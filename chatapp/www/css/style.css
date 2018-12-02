@@ -1,1 +1,40 @@
 /* Empty. Add your own CSS if you like */
+.bg-green {
+  background: #27ae60;
+}
+
+.text-white {
+  color: #ffffff;
+}
+
+.tabs-striped.tabs-background-balanced .tabs {
+  background-color: #27ae60;
+}
+
+.item {
+  border-width: 0px;
+}
+
+.sender {
+  background: gainsboro;
+}
+
+.reply {
+  background: #7dce9f;
+}
+
+.item-image-right {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  max-width: 40px;
+  max-height: 40px;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.text-message-right {
+  position: relative;
+  margin-right: 50px;
+}
