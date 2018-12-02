@@ -132,7 +132,8 @@
         $('#register-tab').hide();
       });
 
-      $('#login-form').on('submit', function () {
+      $('#login-form').on('submit', function (e) {
+          e.preventDefault();
         var data = $(this).serializeArray();
         $.post('http://localhost:3000/loginAuth', data, { "headers": {"Content-Type": "application/json"} })
           .done(function (data) {
