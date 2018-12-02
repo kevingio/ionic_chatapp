@@ -107,10 +107,11 @@
     <script type="text/javascript">
       var socket = io.connect('http://localhost:3000');
 
-      $('#register-form').on('submit', function() {
+      $('#register-form').on('submit', function(e) {
+        e.preventDefault();
         var data = $(this).serializeArray();
         $.post('http://localhost:3000/regisAuth', data, { "headers": {"Content-Type": "application/json"} })
-          .done(function () {
+          .done(function (data) {
             window.location.href = 'http://localhost:8100/messages.html';
           });
       });
