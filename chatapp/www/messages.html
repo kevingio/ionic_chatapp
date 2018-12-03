@@ -64,7 +64,7 @@
         </a>
       </div>
       <div v-else>
-        <a class="item item-avatar" href="#" v-for="(chat,index) in filteredOnlineUsers" @click="goToChat(chat)">
+        <a class="item item-avatar" href="#" v-for="(chat,index) in filteredOnlineUsers" @click="newPrivateChat(chat)">
           <img src="https://emilcarlsson.se/assets/harveyspecter.png">
           <h2>{{ chat.name }}</h2>
           <h2>{{ chat.room_name }}</h2>
@@ -130,8 +130,8 @@
     methods: {
       initChats() {
         let vm = this;
-        let cookie = document.cookie.split(';');
-        let user_temp  = JSON.parse(cookie[1]).user;
+        let cookie = JSON.parse(sessionStorage.getItem("cookie"));
+        let user_temp  = cookie.user;
         vm.user = user_temp;
         axios.get('http://localhost:3000/getOnlineUsers?user_id=' + user_temp.id)
           .then(function (response) {
@@ -150,11 +150,30 @@
           });
       },
       goToChat(index) {
-        var cookie = document.cookie.split(';');
-        let user_temp  = JSON.parse(cookie[1]);
+        let cookie = JSON.parse(sessionStorage.getItem("cookie"));
+        let user_temp  = cookie;
+        
         user_temp.user.room = index;
-        document.cookie = JSON.stringify(user_temp);
+        // document.cookie = JSON.stringify(user_temp);
+        sessionStorage.setItem("room", JSON.stringify(user_temp));
+        console.log(sessionStorage.getItem("room"));
         window.location.href = 'chat.html';
+      },
+      newPrivateChat(target) {
+        let user_temp = JSON.parse(sessionStorage.getItem("cookie"));
+
+        axios.post('http://localhost:3000/newPrivateChat', { user: user_temp.user, target: target})
+        .then(function (response) {
+            // console.log(response.data.room_id)
+            axios.get('http://localhost:3000/getRoomDetail?id=' + response.data.room_id + '&user_id=' + user_temp.user.id)
+            .then(function (res) { 
+                // console.log(res.data);
+                user_temp.user.room = res.data;
+                sessionStorage.setItem("room", JSON.stringify(user_temp));
+                // console.log(sessionStorage.getItem("room"));
+                window.location.href = 'chat.html';
+             });
+        });
       }
     }
   });

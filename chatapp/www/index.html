@@ -113,7 +113,8 @@
         var data = $(this).serializeArray();
         $.post('http://localhost:3000/regisAuth', data, { "headers": {"Content-Type": "application/json"} })
           .done(function (data) {
-            document.cookie = JSON.stringify(data);
+            sessionStorage.setItem("cookie", JSON.stringify(data));
+            console.log(sessionStorage.getItem("cookie"));
             window.location.href = 'http://localhost:8100/messages.html';
           });
       });
@@ -133,7 +134,8 @@
         var data = $(this).serializeArray();
         $.post('http://localhost:3000/loginAuth', data, { "headers": {"Content-Type": "application/json"} })
           .done(function (data) {
-            document.cookie = JSON.stringify(data);
+            sessionStorage.setItem("cookie", JSON.stringify(data));
+            console.log(sessionStorage.getItem("cookie"));
             window.location.href = 'http://localhost:8100/messages.html';
           });
       });

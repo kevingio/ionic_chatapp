@@ -121,10 +121,11 @@
     methods: {
       initChats() {
         let vm = this;
-        let cookie = document.cookie.split(';');
-        let user_temp  = JSON.parse(cookie[1]).user;
-        vm.activeRoom = user_temp.room;
-        vm.user = user_temp;
+        let user_temp  = JSON.parse(sessionStorage.getItem("room"));
+        console.log(user_temp);
+
+        vm.activeRoom = user_temp.user.room;
+        vm.user = user_temp.user;
         axios.get('http://localhost:3000/getChatMessage?room_id=' + vm.activeRoom.room_id)
           .then(function (response) {
             vm.activeChatMessage = response.data;
