@@ -37,39 +37,89 @@
 <body ng-app="starter">
 
 <ion-pane style="background: transparent">
-  <div class="bar bar-header bg-green">
-    <!--<button class="button text-white button-icon icon ion-arrow-left-c"></button>&lt;!&ndash;&ndash;&gt;-->
-    <button class="button text-white button-icon icon" onclick="window.location.href='messages.html'">
-      <ion-icon name="arrow-back" class="mt-1" style="width: 1.5rem; height: 1.5rem; line-height: 1.5rem"></ion-icon>
-    </button>
-    <h1 class="title text-white">Kevin</h1>
-  </div>
-  <div class="list" style="margin-top: 44px;">
-    <a class="item item-avatar" href="#">
-      <img src="https://emilcarlsson.se/assets/harveyspecter.png">
-      <div class="p-2 sender">
-        <p>Back off, man. I'm a scientist.</p>
+  <div id="frame">
+    <div class="bar bar-header bg-green">
+      <!--<button class="button text-white button-icon icon ion-arrow-left-c"></button>&lt;!&ndash;&ndash;&gt;-->
+      <button class="button text-white button-icon icon ion-android-arrow-back" onclick="window.location.href='messages.html'">
+      </button>
+      <h1 class="title text-white">{{ activeRoom.name }}</h1>
+    </div>
+    <div class="list" style="margin-top: 44px;">
+      <div v-for="chat in activeChatMessage">
+        <a class="item item-avatar" href="#" v-if="chat.user_id != user.id">
+          <img src="https://emilcarlsson.se/assets/harveyspecter.png">
+          <div class="p-2 sender" style="float: left;">
+            <p>{{ chat.message }}</p>
+          </div>
+        </a>
+        <a class="item item-avatar right" href="#" v-else>
+          <div class="text-message-right p-2 reply">
+            <p>{{ chat.message }}</p>
+          </div>
+          <img class="item-image-right" src="https://emilcarlsson.se/assets/harveyspecter.png">
+        </a>
       </div>
-    </a>
-    <a class="item item-avatar right" href="#">
-      <div class="text-message-right p-2 reply">
-        <p>Back off, man. I'm a scientist.</p>
-      </div>
-      <img class="item-image-right" src="https://emilcarlsson.se/assets/harveyspecter.png">
-    </a>
-  </div>
-  <div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: gainsboro;">
-    <div class="row m-0">
-      <div class="pr-2" style="width: 90%;">
-        <input type="text" class="form-control px-2" autocomplete="off" placeholder="type message">
-      </div>
-      <div style="width: 10%;">
-        <button type="submit" class="btn bg-green text-white btn-block">
-          <ion-icon name="send" style="padding: 0rem"></ion-icon>
-        </button>
+    </div>
+    <div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: gainsboro;">
+      <div class="row m-0">
+        <div class="pr-2" style="width: 90%;">
+          <input type="text" class="form-control px-2" autocomplete="off" placeholder="type message">
+        </div>
+        <div style="width: 10%;">
+          <button type="submit" class="btn bg-green text-white btn-block icon ion-android-send">
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </ion-pane>
+<script>
+  var halo = new Vue({
+    el: '#frame',
+    data: {
+      chats: [],
+      total_chat: 0,
+      total_user: 0,
+      online_users: [],
+      selected_room: null,
+      state: 'chat',
+      activeRoom: {
+        name: ''
+      },
+      activeChatMessage: [],
+      user: {
+        name: 'Kurir'
+      },
+      socket : io('localhost:3000'),
+      message: '',
+      invitedUsers: [],
+      availableUsers: [],
+      filterSearch: '',
+      newGroupChat: {
+        name: '',
+        users: []
+      },
+    },
+    mounted() {
+
+    },
+    created() {
+      this.initChats();
+    },
+    methods: {
+      initChats() {
+        let vm = this;
+        let cookie = document.cookie.split(';');
+        let user_temp  = JSON.parse(cookie[1]).user;
+        vm.activeRoom = user_temp.room;
+        vm.user = user_temp;
+        axios.get('http://localhost:3000/getChatMessage?room_id=' + vm.activeRoom.room_id)
+          .then(function (response) {
+            vm.activeChatMessage = response.data;
+          });
+      },
+    }
+  });
+</script>
 </body>
 </html>

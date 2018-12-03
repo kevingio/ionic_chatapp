@@ -112,6 +112,7 @@
         var data = $(this).serializeArray();
         $.post('http://localhost:3000/regisAuth', data, { "headers": {"Content-Type": "application/json"} })
           .done(function (data) {
+            document.cookie = JSON.stringify(data);
             window.location.href = 'http://localhost:8100/messages.html';
           });
       });
@@ -127,10 +128,11 @@
       });
 
       $('#login-form').on('submit', function (e) {
-          e.preventDefault();
+        e.preventDefault();
         var data = $(this).serializeArray();
         $.post('http://localhost:3000/loginAuth', data, { "headers": {"Content-Type": "application/json"} })
           .done(function (data) {
+            document.cookie = JSON.stringify(data);
             window.location.href = 'http://localhost:8100/messages.html';
           });
       });

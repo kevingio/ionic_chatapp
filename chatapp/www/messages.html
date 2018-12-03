@@ -38,50 +38,37 @@
 <body ng-app="starter">
 
 <ion-pane style="background: transparent">
-  <div class="bar bar-header bg-green">
-      <button class="button text-white button-icon icon" id="logout">
-        <ion-icon name="log-out" class="mt-1" style="width: 1.5rem; height: 1.5rem; line-height: 1.5rem"></ion-icon>
+  <div id="frame">
+    <div class="bar bar-header bg-green">
+      <button class="button text-white button-icon icon ion-log-out" id="logout">
       </button>
-    <h1 class="title text-white">Kurir</h1>
-    <button class="button text-white button-icon icon">
-      <ion-icon name="search" class="mt-1" style="width: 1.5rem; height: 1.5rem; line-height: 1.5rem"></ion-icon>
+      <h1 class="title text-white">Kurir</h1>
+      <button class="button text-white button-icon icon ion-search">
+      </button>
+    </div>
+    <div class="tabs-striped tabs-top tabs-background-balanced tabs-color-light">
+      <div class="tabs">
+        <a class="tab-item active" id="recent-chat-tab" href="#">
+          Recent Chat
+        </a>
+        <a class="tab-item" id="online-tab" href="#">
+          Online
+        </a>
+      </div>
+    </div>
+    <div class="list" style="margin-top: 92px;">
+      <div>
+        <a class="item item-avatar" href="#" v-for="(chat,index) in filteredList" @click="goToChat(chat)">
+          <img src="https://emilcarlsson.se/assets/harveyspecter.png">
+          <h2 v-if="chat.type == 'private'">{{ chat.name }}</h2>
+          <h2 v-else>{{ chat.room_name }}</h2>
+          <p>chat with me!</p>
+        </a>
+      </div>
+    </div>
+    <button class="btn-danger btn btn-lg icon ion-android-add" style="position: fixed; right: 7%; bottom: 5%; -webkit-border-radius: 80%;-moz-border-radius: 80%;border-radius: 80%; padding: .2rem .75rem;">
     </button>
   </div>
-  <div class="tabs-striped tabs-top tabs-background-balanced tabs-color-light">
-    <div class="tabs">
-      <a class="tab-item active" id="recent-chat-tab" href="#">
-        Recent Chat
-      </a>
-      <a class="tab-item" id="online-tab" href="#">
-        Online
-      </a>
-    </div>
-  </div>
-  <div class="list" style="margin-top: 92px;">
-    <a class="item item-avatar" href="#">
-      <img src="https://emilcarlsson.se/assets/harveyspecter.png">
-      <h2>Venkman</h2>
-      <p>Back off, man. I'm a scientist.</p>
-    </a>
-    <a class="item item-avatar" href="#">
-      <img src="https://emilcarlsson.se/assets/harveyspecter.png">
-      <h2>Venkman</h2>
-      <p>Back off, man. I'm a scientist.</p>
-    </a>
-    <a class="item item-avatar" href="#">
-      <img src="https://emilcarlsson.se/assets/harveyspecter.png">
-      <h2>Venkman</h2>
-      <p>Back off, man. I'm a scientist.</p>
-    </a>
-    <a class="item item-avatar" href="#">
-      <img src="https://emilcarlsson.se/assets/harveyspecter.png">
-      <h2>Venkman</h2>
-      <p>Back off, man. I'm a scientist.</p>
-    </a>
-  </div>
-  <button class="btn-danger btn btn-lg" style="position: fixed; right: 7%; bottom: 5%; -webkit-border-radius: 100%;-moz-border-radius: 100%;border-radius: 100%; padding: .5rem .75rem;">
-    <ion-icon name="add"></ion-icon>
-  </button>
 </ion-pane>
 <script>
   $('#recent-chat-tab').on('click', function () {
@@ -97,6 +84,89 @@
   });
   $('#logout').on('click', function () {
     window.location.href = '/';
+  });
+</script>
+<script type="text/javascript">
+  var halo = new Vue({
+    el: '#frame',
+    data: {
+      chats: [],
+      total_chat: 0,
+      total_user: 0,
+      online_users: [],
+      selected_room: null,
+      state: 'chat',
+      activeRoom: null,
+      activeChatMessage: [],
+      user: {
+        name: 'Kurir'
+      },
+      socket : io('localhost:3000'),
+      message: '',
+      invitedUsers: [],
+      availableUsers: [],
+      filterSearch: '',
+      newGroupChat: {
+        name: '',
+        users: []
+      },
+    },
+    mounted() {
+
+    },
+    computed: {
+      filteredList() {
+        if(this.chats) {
+          return this.chats.filter(chat => {
+            if(chat.type == 'private') {
+              return chat.name.toLowerCase().includes(this.filterSearch.toLowerCase())
+            } else {
+              return chat.room_name.toLowerCase().includes(this.filterSearch.toLowerCase())
+            }
+          })
+        }
+      },
+      filteredOnlineUsers() {
+        if(this.online_users) {
+          return this.online_users.filter(chat => {
+            return chat.name.toLowerCase().includes(this.filterSearch.toLowerCase())
+          })
+        }
+      }
+    },
+    created() {
+      this.initChats();
+    },
+    methods: {
+      initChats() {
+        let vm = this;
+        let cookie = document.cookie.split(';');
+        let user_temp  = JSON.parse(cookie[1]).user;
+        vm.user = user_temp;
+        axios.get('http://localhost:3000/getOnlineUsers?user_id=' + user_temp.id)
+          .then(function (response) {
+            vm.online_users = response.data.users;
+          });
+        axios.get('http://localhost:3000/getRecentRoomChats?user_id=' + user_temp.id)
+          .then(function (response) {
+            vm.chats = response.data.chats;
+            vm.total_chat = response.data.total;
+            vm.chats.forEach(function (chat) {
+              if (chat.type == 'private') {
+                var temp = chat.room_name.replace(vm.user.name, '');
+                chat.name = temp;
+              }
+            });
+          });
+      },
+      goToChat(index) {
+        var cookie = document.cookie.split(';');
+        let user_temp  = JSON.parse(cookie[1]);
+        user_temp.user.room = index;
+        document.cookie = JSON.stringify(user_temp);
+        window.location.href = 'chat.html';
+      }
+    }
   });
 </script>
 </body>
