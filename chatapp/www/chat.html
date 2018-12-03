@@ -49,11 +49,13 @@
         <a class="item item-avatar" href="#" v-if="chat.user_id != user.id">
           <img src="https://emilcarlsson.se/assets/harveyspecter.png">
           <div class="p-2 sender" style="float: left;">
+            <h3>{{ chat.name }}</h3>
             <p>{{ chat.message }}</p>
           </div>
         </a>
         <a class="item item-avatar right" href="#" v-else>
           <div class="text-message-right p-2 reply">
+            <h3>{{ chat.name }}</h3>
             <p>{{ chat.message }}</p>
           </div>
           <img class="item-image-right" src="https://emilcarlsson.se/assets/harveyspecter.png">
@@ -63,11 +65,10 @@
     <div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: gainsboro;">
       <div class="row m-0">
         <div class="pr-2" style="width: 90%;">
-          <input type="text" class="form-control px-2" autocomplete="off" placeholder="type message">
+          <input type="text" class="form-control px-2" v-model="message" autocomplete="off" placeholder="type message" @keydown.enter="sendMessage(activeRoom.room_id)">
         </div>
         <div style="width: 10%;">
-          <button type="submit" class="btn bg-green text-white btn-block icon ion-android-send">
-          </button>
+          <button type="submit" class="btn bg-green text-white btn-block icon ion-android-send" @click="sendMessage(activeRoom.room_id)"></button>
         </div>
       </div>
     </div>
@@ -101,7 +102,18 @@
       },
     },
     mounted() {
+      this.socket.on('connect', () => {
 
+      });
+      this.socket.on('GET_MESSAGE', (data) => {
+        var temp = data;
+        this.online_users.forEach((user) => {
+          if(user.id == temp.user_id) {
+            temp.name = user.name;
+          }
+        });
+        this.activeChatMessage.push(temp);
+      });
     },
     created() {
       this.initChats();
@@ -117,6 +129,14 @@
           .then(function (response) {
             vm.activeChatMessage = response.data;
           });
+      },
+      sendMessage(room_id) {
+        this.socket.emit('SEND_MESSAGE', {
+          user: this.user,
+          message: this.message,
+          room_id: room_id
+        });
+        this.message = '';
       },
     }
   });
